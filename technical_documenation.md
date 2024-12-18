@@ -23,11 +23,13 @@ Real Machine: Press a physical key
 My Program:
 cppCopychar input = 'A';  // When you type a letter
 int position = input - 'A';  // Convert to 0-25
+
 2. Plugboard First! 🔌
 Real Machine: Signal goes through a physical plugboard with cables
 My Program:
 cppCopy// If A is swapped with B, A becomes B before encryption
 char swapped = plugboard[position];
+
 3. Through the Rotors! 🎡
 Real Machine: Electricity flows through 3 mechanical rotors
 My Program:
@@ -37,11 +39,13 @@ position = step_through_rotor(right, position);
 position = step_through_rotor(middle, position);
 // Left rotor
 position = step_through_rotor(left, position);
+
 4. The Reflector Magic 🪞
 Real Machine: Signal hits a reflector and bounces back
 My Program:
 cppCopy// Reflector sends signal back through a different path
 position = step_through_rotor(reflector, position);
+
 5. Back Through the Rotors! ↩️
 Real Machine: Signal travels back through rotors in reverse
 My Program:
@@ -49,6 +53,7 @@ cppCopy// Go back through all rotors in reverse
 position = step_through_rotor_reverse(left, position);
 position = step_through_rotor_reverse(middle, position);
 position = step_through_rotor_reverse(right, position);
+
 6. Plugboard Again! 🔄
 Real Machine: Signal goes through plugboard one last time
 My Program:
@@ -155,34 +160,7 @@ struct rotor {
 1. `init_plugboard`: Sets up basic A-Z mapping
 2. `set_plugboard_pair`: Lets you swap letter pairs
 
-## How to Use It 💡
 
-### Example 1: Basic Encryption
-```
-Pick option (1-5): 1
-Type your message: HELLO
-Encrypted result: LZFBD
-```
-
-### Example 2: Using Plugboard
-```
-Pick option (1-5): 3
-Which letters to swap? (like AB): HM
-Done! Now H and M will swap places
-```
-
-### Example 3: Changing Rotor Positions
-```
-Pick option (1-5): 4
-Enter 3 letters (like AAA): XYZ
-Rotors set! This completely changes how it encrypts
-```
-
-## Cool Features ⭐
-- Type something, encrypt it, then decrypt it - you get the original back!
-- Rotors turn differently based on position
-- You can set up the machine different ways
-- Easy to use menu
 - Just like the real thing (but way easier to understand!)
 
 ---
