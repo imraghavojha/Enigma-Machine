@@ -18,7 +18,6 @@ void init_rotor(rotor& x, char config[26]) {
     }
     x.position = 0;
 }
-
 void rotate_column(char y[26]) {  
     char first = y[0];
     for(int i = 0; i < 25; i++) {  
@@ -26,18 +25,28 @@ void rotate_column(char y[26]) {
     }
     y[25] = first;  
 }
-
 void rotate_rotor(rotor& x) {
     rotate_column(x.normal);
     rotate_column(x.scrambled);
     x.position = (x.position + 1) % 26;  
 }
+void check_and_rotate_rotors(rotor& left, rotor& middle, rotor& right) {
+    if (right.position == 25) {   // positions are 0-25
+        rotate_rotor(middle);    
+    } 
+    if (middle.position == 25) { 
+        rotate_rotor(left);       
+    }
+    rotate_rotor(right);          // right rotor always rotates
+}
+
 
 int main() {
     rotor rotor1;
     char rotor1_config[26] = {'E', 'K', 'M', 'F', 'L', 'G', 'D', 'Q', 'V', 'Z', 'N', 'T', 'O', 'W', 'Y', 'H', 'X', 'U', 'S', 'P', 'A', 'I', 'B', 'R', 'C', 'J'};
 
     init_rotor(rotor1, rotor1_config);
+    rotate_rotor(rotor1);
     
     for(int i = 0; i < 26; i++) {
         cout << rotor1.scrambled[i] << " ";
