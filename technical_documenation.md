@@ -17,82 +17,6 @@ Instead of electrical signals → I use numbers (0-25 for A-Z)
 Instead of mechanical rotation → I shift array positions
 Instead of light bulbs → I output characters
 
-Step-by-Step Journey of a Letter ✨
-1. Typing a Letter 📝
-Real Machine: Press a physical key
-My Program:
-cppCopychar input = 'A';  // When you type a letter
-int position = input - 'A';  // Convert to 0-25
-
-2. Plugboard First! 🔌
-Real Machine: Signal goes through a physical plugboard with cables
-My Program:
-cppCopy// If A is swapped with B, A becomes B before encryption
-char swapped = plugboard[position];
-
-3. Through the Rotors! 🎡
-Real Machine: Electricity flows through 3 mechanical rotors
-My Program:
-cppCopy// Right rotor
-position = step_through_rotor(right, position);
-// Middle rotor
-position = step_through_rotor(middle, position);
-// Left rotor
-position = step_through_rotor(left, position);
-
-4. The Reflector Magic 🪞
-Real Machine: Signal hits a reflector and bounces back
-My Program:
-cppCopy// Reflector sends signal back through a different path
-position = step_through_rotor(reflector, position);
-
-5. Back Through the Rotors! ↩️
-Real Machine: Signal travels back through rotors in reverse
-My Program:
-cppCopy// Go back through all rotors in reverse
-position = step_through_rotor_reverse(left, position);
-position = step_through_rotor_reverse(middle, position);
-position = step_through_rotor_reverse(right, position);
-
-6. Plugboard Again! 🔄
-Real Machine: Signal goes through plugboard one last time
-My Program:
-cppCopy// Final swap if letter is in plugboard
-char final_letter = plugboard[position];
-The Cool Rotor Movement! ⚙️
-Real Machine
-
-Right rotor: moves every keypress
-Middle rotor: moves when right completes full rotation
-Left rotor: moves when middle completes full rotation
-
-My Program
-cppCopyvoid check_and_rotate_rotors() {
-    if (right.position == 25)  // Right rotor made full turn
-        rotate_rotor(middle);
-    if (middle.position == 25)  // Middle rotor made full turn
-        rotate_rotor(left);
-    rotate_rotor(right);  // Right always moves
-}
-Why This is Super Cool! 🌟
-
-Same Input = Different Output 🎯
-
-Because rotors move, same letter encrypts differently each time!
-"AAA" might encrypt to "BKW"
-
-
-Impossible to Guess 🤔
-
-With different rotor positions and plugboard settings
-Millions of possible combinations!
-
-
-Perfect for Learning 📚
-
-Shows how encryption works
-Demonstrates arrays, loops, and functions in C++
-Models a real historical device!
 
 
 ## Main Parts of the Program 🛠️
@@ -159,6 +83,99 @@ struct rotor {
 ### Plugboard Stuff
 1. `init_plugboard`: Sets up basic A-Z mapping
 2. `set_plugboard_pair`: Lets you swap letter pairs
+
+# Step-by-Step Journey of a Letter Through Enigma 🔍
+
+## 1. Letter Input Stage 📝
+When you type a letter, it first gets converted to a number (0-25):
+```cpp
+char input = 'A';              // User types a letter
+int position = input - 'A';    // 'A' becomes 0, 'B' becomes 1, etc.
+```
+
+## 2. First Plugboard Transformation 🔌
+Before entering rotors, letter might get swapped by plugboard:
+```cpp
+// If A is connected to B in plugboard:
+// position = 0 (for 'A')
+char first_swap = plugboard[position];  // Gets 'B'
+position = first_swap - 'A';           // New position becomes 1 (for 'B')
+```
+
+## 3. Through the Rotor System (Forward Path) ➡️
+Signal passes through each rotor from right to left:
+```cpp
+// Right Rotor
+position = step_through_rotor(right, position);
+// Goes from position 1 to new position based on rotor wiring
+
+// Middle Rotor
+position = step_through_rotor(middle, position);
+// Takes previous position to new position
+
+// Left Rotor
+position = step_through_rotor(left, position);
+// Final forward transformation
+```
+
+## 4. Reflector Bounce 🪞
+Signal hits reflector and returns on different path:
+```cpp
+position = step_through_rotor(reflector, position);
+// Reflector ensures no letter can encrypt to itself
+```
+
+## 5. Return Through Rotors (Reverse Path) ⬅️
+Signal travels back through rotors in opposite direction:
+```cpp
+// Left Rotor (reverse)
+position = step_through_rotor_reverse(left, position);
+
+// Middle Rotor (reverse)
+position = step_through_rotor_reverse(middle, position);
+
+// Right Rotor (reverse)
+position = step_through_rotor_reverse(right, position);
+```
+
+## 6. Final Plugboard Pass 🔄
+One last transformation through plugboard:
+```cpp
+// If position represents 'B', and B is connected to A
+return plugboard[position];  // Returns 'A'
+```
+
+## 7. Rotor Movement Update ⚙️
+After each letter, rotors rotate according to rules:
+```cpp
+void check_and_rotate_rotors(rotor& left, rotor& middle, rotor& right) {
+    if (right.position == 25) {    // Right rotor made full turn
+        rotate_rotor(middle);    
+    } 
+    if (middle.position == 25) {   // Middle rotor made full turn
+        rotate_rotor(left);       
+    }
+    rotate_rotor(right);           // Right rotor always rotates
+}
+```
+
+## Example Complete Path:
+```cpp
+Input 'A' → 
+  Position 0 →
+    Plugboard (A→B) → Position 1 →
+      Right Rotor → Position 14 →
+        Middle Rotor → Position 22 →
+          Left Rotor → Position 8 →
+            Reflector → Position 19 →
+          Left Rotor reverse → Position 11 →
+        Middle Rotor reverse → Position 4 →
+      Right Rotor reverse → Position 7 →
+    Plugboard → 
+Output 'H'
+```
+
+Each step changes the letter's path, and because rotors move after each letter, the same input letter will encrypt differently next time! 🎯
 
 
 - Just like the real thing (but way easier to understand!)
