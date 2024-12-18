@@ -145,15 +145,20 @@ string encrypt_message(rotor& left, rotor& middle, rotor& right, rotor& reflecto
     
     return result;
 }
+void print_menu() {
+    cout << "\nENIGMA MACHINE SIMULATOR\n";
+    cout << "1. Encrypt a message\n";
+    cout << "2. Decrypt a message\n";
+    cout << "3. Configure plugboard\n";
+    cout << "4. Set rotor positions\n";
+    cout << "5. Exit\n";
+    cout << "Choose option (1-5): ";
+}
 
 int main() {
     // Initialize plugboard
     char plugboard[26];  
     init_plugboard(plugboard);
-    
-    // Set up some test pairs: A<->B, X<->Z
-    set_plugboard_pair(plugboard, 'A', 'B');
-    set_plugboard_pair(plugboard, 'X', 'Z');
     
     // Create and initialize all rotors
     rotor right, middle, left, reflector;
@@ -164,37 +169,66 @@ int main() {
     char rotor3_config[26] = {'B', 'D', 'F', 'H', 'J', 'L', 'C', 'P', 'R', 'T', 'X', 'V', 'Z', 'N', 'Y', 'E', 'I', 'W', 'G', 'A', 'K', 'M', 'U', 'S', 'Q', 'O'};
     char reflector_config[26] = {'E', 'J', 'M', 'Z', 'A', 'L', 'Y', 'X', 'V', 'B', 'W', 'F', 'C', 'R', 'Q', 'U', 'O', 'N', 'T', 'S', 'P', 'I', 'K', 'H', 'G', 'D'};
 
-    // Initialize all rotors
-    init_rotor(right, rotor1_config, 'C');
-    init_rotor(middle, rotor2_config);
-    init_rotor(left, rotor3_config);
+    // Initialize all rotors with default positions
+    init_rotor(right, rotor1_config, 'A');
+    init_rotor(middle, rotor2_config, 'A');
+    init_rotor(left, rotor3_config, 'A');
     init_rotor(reflector, reflector_config);
 
-    cout << "\n*** Testing Full Message Encryption ***\n";
+    string message;
+    int choice;
     
-    // Test message encryption
-    string test_message = "HELLO";
-    cout << "\nOriginal message: " << test_message << endl;
-    
-    reset_rotors(left, middle, right);  // Make sure rotors are in initial position
-    string encrypted = encrypt_message(left, middle, right, reflector, test_message, plugboard);
-    cout << "Encrypted message: " << encrypted << endl;
-    
-    reset_rotors(left, middle, right);  // Reset before decryption
-    string decrypted = encrypt_message(left, middle, right, reflector, encrypted, plugboard);
-    cout << "Decrypted message: " << decrypted << endl;
+    while(true) {
+        cout << "\nENIGMA MACHINE SIMULATOR\n";
+        cout << "1. Encrypt a message\n";
+        cout << "2. Decrypt a message\n";
+        cout << "3. Configure plugboard\n";
+        cout << "4. Set rotor positions\n";
+        cout << "5. Exit\n";
+        cout << "Choose option (1-5): ";
+        
+        cin >> choice;
+        cin.ignore();
 
-    // Test another message
-    test_message = "ENIGMA";
-    cout << "\nOriginal message: " << test_message << endl;
-    
-    reset_rotors(left, middle, right);
-    encrypted = encrypt_message(left, middle, right, reflector, test_message, plugboard);
-    cout << "Encrypted message: " << encrypted << endl;
-    
-    reset_rotors(left, middle, right);
-    decrypted = encrypt_message(left, middle, right, reflector, encrypted, plugboard);
-    cout << "Decrypted message: " << decrypted << endl;
+        if(choice == 5) break;
+
+        switch(choice) {
+            case 1:
+                cout << "Enter message to encrypt: ";
+                getline(cin, message);
+                reset_rotors(left, middle, right);
+                cout << "Encrypted: " << encrypt_message(left, middle, right, reflector, message, plugboard) << endl;
+                break;
+
+            case 2:
+                cout << "Enter message to decrypt: ";
+                getline(cin, message);
+                reset_rotors(left, middle, right);
+                cout << "Decrypted: " << encrypt_message(left, middle, right, reflector, message, plugboard) << endl;
+                break;
+
+            case 3:
+                cout << "Enter two letters to swap (e.g., AB): ";
+                char a, b;
+                cin >> a >> b;
+                set_plugboard_pair(plugboard, a, b);
+                cout << "Plugboard updated\n";
+                break;
+
+            case 4:
+                cout << "Enter three letters for rotor positions (e.g., AAA): ";
+                char l, m, r;
+                cin >> l >> m >> r;
+                init_rotor(left, rotor3_config, l);
+                init_rotor(middle, rotor2_config, m);
+                init_rotor(right, rotor1_config, r);
+                cout << "Rotor positions updated\n";
+                break;
+
+            default:
+                cout << "Invalid option\n";
+        }
+    }
 
     return 0;
 }
