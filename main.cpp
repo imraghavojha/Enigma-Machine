@@ -5,19 +5,9 @@ struct rotor {
     char normal[26];
     char scrambled[26];
     int position;
+    char init_position;
 };
 
-void init_rotor(rotor& x, char config[26]) {
-    // Initialize normal A-Z array
-    for(int i = 0; i < 26; i++) {
-        x.normal[i] = 'A' + i;
-    }
-    // Initialize scrambled array with config
-    for(int i = 0; i < 26; i++) {
-        x.scrambled[i] = config[i];
-    }
-    x.position = 0;
-}
 void rotate_column(char y[26]) {  
     char first = y[0];
     for(int i = 0; i < 25; i++) {  
@@ -30,6 +20,23 @@ void rotate_rotor(rotor& x) {
     rotate_column(x.scrambled);
     x.position = (x.position + 1) % 26;  
 }
+void init_rotor(rotor& x, char config[26], char init_config = 'A') {
+    // Initialize normal A-Z array
+    for(int i = 0; i < 26; i++) {
+        x.normal[i] = 'A' + i;
+    }
+    // Initialize scrambled array with config
+    for(int i = 0; i < 26; i++) {
+        x.scrambled[i] = config[i];
+    }
+    x.position = 0;
+    x.init_position = init_config;  // Store initial position
+
+    while(x.normal[0] != x.init_position) {  // Fixed: using init_position
+        rotate_rotor(x);
+    }
+}
+
 void check_and_rotate_rotors(rotor& left, rotor& middle, rotor& right) {
     if (right.position == 25) {   // positions are 0-25
         rotate_rotor(middle);    
@@ -63,16 +70,33 @@ int step_through_rotor_reverse(rotor& r, int position) {
     }
     return -1;
 }
+// void reset_rotors(rotor& left, rotor& middle, rotor& right) {
+//     // Calculate how many rotations needed to get back to 0
+//     while(right.position != 0) {
+//         rotate_rotor(right);
+//     }
+//     while(middle.position != 0) {
+//         rotate_rotor(middle);
+//     }
+//     while(left.position != 0) {
+//         rotate_rotor(left);
+//     }
+// }
+
 void reset_rotors(rotor& left, rotor& middle, rotor& right) {
-    // Calculate how many rotations needed to get back to 0
-    while(right.position != 0) {
-        rotate_rotor(right);
+    // Reset left rotor
+    while(left.normal[0] != left.init_position) {
+        rotate_rotor(left);
     }
-    while(middle.position != 0) {
+    
+    // Reset middle rotor
+    while(middle.normal[0] != middle.init_position) {
         rotate_rotor(middle);
     }
-    while(left.position != 0) {
-        rotate_rotor(left);
+    
+    // Reset right rotor
+    while(right.normal[0] != right.init_position) {
+        rotate_rotor(right);
     }
 }
 
@@ -120,7 +144,7 @@ int main() {
     char reflector_config[26] = {'E', 'J', 'M', 'Z', 'A', 'L', 'Y', 'X', 'V', 'B', 'W', 'F', 'C', 'R', 'Q', 'U', 'O', 'N', 'T', 'S', 'P', 'I', 'K', 'H', 'G', 'D'};
 
     // Initialize all rotors
-    init_rotor(right, rotor1_config);
+    init_rotor(right, rotor1_config, 'C');
     init_rotor(middle, rotor2_config);
     init_rotor(left, rotor3_config);
     init_rotor(reflector, reflector_config);
