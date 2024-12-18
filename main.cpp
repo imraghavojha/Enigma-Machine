@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 using namespace std;
 
 struct rotor {
@@ -134,6 +135,16 @@ char encrypt_letter(rotor& left, rotor& middle, rotor& right, rotor& reflector, 
     // 6. Second plugboard transformation
     return plugboard[position];
 }
+string encrypt_message(rotor& left, rotor& middle, rotor& right, rotor& reflector, string message, char plugboard[26]) {
+    string result = "";
+    
+    for(int i = 0; i < message.length(); i++) {
+        char encrypted_letter = encrypt_letter(left, middle, right, reflector, message[i], plugboard);
+        result += encrypted_letter;
+    }
+    
+    return result;
+}
 
 int main() {
     // Initialize plugboard
@@ -159,36 +170,31 @@ int main() {
     init_rotor(left, rotor3_config);
     init_rotor(reflector, reflector_config);
 
-    // Test cases
-    cout << "Testing plugboard with swaps A<->B and X<->Z\n";
+    cout << "\n*** Testing Full Message Encryption ***\n";
+    
+    // Test message encryption
+    string test_message = "HELLO";
+    cout << "\nOriginal message: " << test_message << endl;
+    
+    reset_rotors(left, middle, right);  // Make sure rotors are in initial position
+    string encrypted = encrypt_message(left, middle, right, reflector, test_message, plugboard);
+    cout << "Encrypted message: " << encrypted << endl;
+    
+    reset_rotors(left, middle, right);  // Reset before decryption
+    string decrypted = encrypt_message(left, middle, right, reflector, encrypted, plugboard);
+    cout << "Decrypted message: " << decrypted << endl;
 
-    // Test 1: Input 'A'
-    cout << "\nTest 1:";
-    reset_rotors(left, middle, right);  // Add reset here
-    char test_char = 'A';
-    char encrypted = encrypt_letter(left, middle, right, reflector, test_char, plugboard);
+    // Test another message
+    test_message = "ENIGMA";
+    cout << "\nOriginal message: " << test_message << endl;
+    
     reset_rotors(left, middle, right);
-    char decrypted = encrypt_letter(left, middle, right, reflector, encrypted, plugboard);
-    cout << "Original: " << test_char << " -> Encrypted: " << encrypted << " -> Decrypted: " << decrypted << endl;
-
-    // Test 2: Input 'X'
-    cout << "\nTest 2:";
-    reset_rotors(left, middle, right);  // Add reset here
-    test_char = 'X';
-    encrypted = encrypt_letter(left, middle, right, reflector, test_char, plugboard);
+    encrypted = encrypt_message(left, middle, right, reflector, test_message, plugboard);
+    cout << "Encrypted message: " << encrypted << endl;
+    
     reset_rotors(left, middle, right);
-    decrypted = encrypt_letter(left, middle, right, reflector, encrypted, plugboard);
-    cout << "Original: " << test_char << " -> Encrypted: " << encrypted << " -> Decrypted: " << decrypted << endl;
-
-    // Test 3: Input 'C'
-    cout << "\nTest 3:";
-    reset_rotors(left, middle, right);  // Add reset here
-    test_char = 'C';
-    encrypted = encrypt_letter(left, middle, right, reflector, test_char, plugboard);
-    reset_rotors(left, middle, right);
-    decrypted = encrypt_letter(left, middle, right, reflector, encrypted, plugboard);
-    cout << "Original: " << test_char << " -> Encrypted: " << encrypted << " -> Decrypted: " << decrypted << endl;
+    decrypted = encrypt_message(left, middle, right, reflector, encrypted, plugboard);
+    cout << "Decrypted message: " << decrypted << endl;
 
     return 0;
-    
 }
