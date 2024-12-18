@@ -7,6 +7,21 @@ struct rotor {
     int position;
     char init_position;
 };
+void init_plugboard(char plugboard[26]) {
+    // Initialize with default mapping (no swaps)
+    for(int i = 0; i < 26; i++) {
+        plugboard[i] = 'A' + i;
+    }
+}
+void set_plugboard_pair(char plugboard[26], char a, char b) {
+    // Get array indices
+    int a_idx = a - 'A';
+    int b_idx = b - 'A';
+    
+    // Swap the letters
+    plugboard[a_idx] = b;
+    plugboard[b_idx] = a;
+}
 
 void rotate_column(char y[26]) {  
     char first = y[0];
@@ -36,7 +51,6 @@ void init_rotor(rotor& x, char config[26], char init_config = 'A') {
         rotate_rotor(x);
     }
 }
-
 void check_and_rotate_rotors(rotor& left, rotor& middle, rotor& right) {
     if (right.position == 25) {   // positions are 0-25
         rotate_rotor(middle);    
@@ -70,19 +84,6 @@ int step_through_rotor_reverse(rotor& r, int position) {
     }
     return -1;
 }
-// void reset_rotors(rotor& left, rotor& middle, rotor& right) {
-//     // Calculate how many rotations needed to get back to 0
-//     while(right.position != 0) {
-//         rotate_rotor(right);
-//     }
-//     while(middle.position != 0) {
-//         rotate_rotor(middle);
-//     }
-//     while(left.position != 0) {
-//         rotate_rotor(left);
-//     }
-// }
-
 void reset_rotors(rotor& left, rotor& middle, rotor& right) {
     // Reset left rotor
     while(left.normal[0] != left.init_position) {
@@ -99,15 +100,16 @@ void reset_rotors(rotor& left, rotor& middle, rotor& right) {
         rotate_rotor(right);
     }
 }
-
-char encrypt_letter(rotor& left, rotor& middle, rotor& right, rotor& reflector, char input) {
+char encrypt_letter(rotor& left, rotor& middle, rotor& right, rotor& reflector, char input, char plugboard[26]) {
     cout << "\nEncrypting " << input << endl;
     cout << "Starting positions - Left: " << left.position 
          << " Middle: " << middle.position 
          << " Right: " << right.position << endl;
     
-    // 1. Convert input letter to position (0-25)
-    int position = input - 'A';  
+    // 1. First plugboard transformation
+    int position = input - 'A';
+    char first_swap = plugboard[position];
+    position = first_swap - 'A';
     
     // 2. Rotate rotors first (do this before encryption)
     check_and_rotate_rotors(left, middle, right);
@@ -129,11 +131,19 @@ char encrypt_letter(rotor& left, rotor& middle, rotor& right, rotor& reflector, 
     position = step_through_rotor_reverse(middle, position);
     position = step_through_rotor_reverse(right, position);
     
-    // 6. Convert final position back to letter
-    return 'A' + position;
+    // 6. Second plugboard transformation
+    return plugboard[position];
 }
 
 int main() {
+    // Initialize plugboard
+    char plugboard[26];  
+    init_plugboard(plugboard);
+    
+    // Set up some test pairs: A<->B, X<->Z
+    set_plugboard_pair(plugboard, 'A', 'B');
+    set_plugboard_pair(plugboard, 'X', 'Z');
+    
     // Create and initialize all rotors
     rotor right, middle, left, reflector;
     
@@ -149,23 +159,36 @@ int main() {
     init_rotor(left, rotor3_config);
     init_rotor(reflector, reflector_config);
 
-    // // Test 1: Multiple letters
-    // char test_word[] = "AAAAA";
-    // cout << "Input: " << test_word << endl;
-    // cout << "Encrypted: ";
-    // for(int i = 0; i < 5; i++) {
-    //     cout << encrypt_letter(left, middle, right, reflector, test_word[i]);
-    // }
-    // cout << endl;
+    // Test cases
+    cout << "Testing plugboard with swaps A<->B and X<->Z\n";
 
-    // Test 2: Reciprocal
+    // Test 1: Input 'A'
+    cout << "\nTest 1:";
+    reset_rotors(left, middle, right);  // Add reset here
     char test_char = 'A';
-    char encrypted = encrypt_letter(left, middle, right, reflector, test_char);
-    reset_rotors(left, middle, right);  // Reset before decrypting
-    char decrypted = encrypt_letter(left, middle, right, reflector, encrypted);
+    char encrypted = encrypt_letter(left, middle, right, reflector, test_char, plugboard);
+    reset_rotors(left, middle, right);
+    char decrypted = encrypt_letter(left, middle, right, reflector, encrypted, plugboard);
+    cout << "Original: " << test_char << " -> Encrypted: " << encrypted << " -> Decrypted: " << decrypted << endl;
+
+    // Test 2: Input 'X'
+    cout << "\nTest 2:";
+    reset_rotors(left, middle, right);  // Add reset here
+    test_char = 'X';
+    encrypted = encrypt_letter(left, middle, right, reflector, test_char, plugboard);
+    reset_rotors(left, middle, right);
+    decrypted = encrypt_letter(left, middle, right, reflector, encrypted, plugboard);
+    cout << "Original: " << test_char << " -> Encrypted: " << encrypted << " -> Decrypted: " << decrypted << endl;
+
+    // Test 3: Input 'C'
+    cout << "\nTest 3:";
+    reset_rotors(left, middle, right);  // Add reset here
+    test_char = 'C';
+    encrypted = encrypt_letter(left, middle, right, reflector, test_char, plugboard);
+    reset_rotors(left, middle, right);
+    decrypted = encrypt_letter(left, middle, right, reflector, encrypted, plugboard);
     cout << "Original: " << test_char << " -> Encrypted: " << encrypted << " -> Decrypted: " << decrypted << endl;
 
     return 0;
-
     
 }
