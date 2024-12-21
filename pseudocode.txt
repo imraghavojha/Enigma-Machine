@@ -1,0 +1,60 @@
+Initialize Plugboard:
+    Set each letter to map to itself.
+
+Define Rotor Structure:
+    Fields: normal, scrambled, position, init_position.
+
+Function: Rotate Column (rotor_array)
+    Shift all elements of the rotor array one position.
+
+Function: Rotate Rotor (rotor)
+    Rotate both normal and scrambled arrays.
+    Update rotor's position.
+
+Function: Initialize Rotor (rotor, config, init_config)
+    Set rotor's normal array as A-Z.
+    Set scrambled array based on config.
+    Rotate rotor until its starting letter matches init_config.
+
+Function: Check and Rotate Rotors (left, middle, right)
+    If right rotor completes one full rotation, rotate middle rotor.
+    If middle rotor completes one full rotation, rotate left rotor.
+    Rotate right rotor every time.
+
+Function: Step Through Rotor (rotor, position)
+    Forward path: Get scrambled letter from the rotor.
+    Find its index in the rotor's normal array.
+
+Function: Step Through Rotor Reverse (rotor, position)
+    Reverse path: Get normal letter from the rotor.
+    Find its index in the rotor's scrambled array.
+
+Function: Reset Rotors (left, middle, right)
+    Rotate each rotor back to its initial position.
+
+Function: Encrypt Letter (left, middle, right, reflector, input, plugboard)
+    Pass letter through plugboard.
+    Rotate rotors.
+    Forward path through right, middle, left rotors, and reflector.
+    Reverse path back through left, middle, right rotors.
+    Pass letter through plugboard again.
+
+Function: Encrypt Message (left, middle, right, reflector, message, plugboard)
+    For each letter in the message:
+        Encrypt it using Encrypt Letter function.
+
+Main Program:
+    Initialize plugboard.
+    Initialize rotors: left, middle, right, and reflector.
+    Display Menu:
+        1. Encrypt Message:
+            Reset rotors.
+            Encrypt input message.
+        2. Decrypt Message:
+            Reset rotors.
+            Encrypt input message (same process as encryption).
+        3. Configure Plugboard:
+            Swap two letters in the plugboard.
+        4. Set Rotor Positions:
+            Reset rotors to user-defined positions.
+        5. Exit Program.
