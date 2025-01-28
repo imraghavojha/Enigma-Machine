@@ -5,6 +5,7 @@
 ## The Legacy of Enigma ⚡
 
 The Enigma machine isn't just any encryption device - it changed history! This seemingly simple machine was so complex that breaking it led to:
+
 - Creation of the first computer by Alan Turing
 - Birth of modern computing and cryptography
 - Allied victory in WWII by breaking "unbreakable" codes
@@ -14,15 +15,15 @@ The Enigma machine isn't just any encryption device - it changed history! This s
 ## What Makes This Simulator Special 🌟
 
 Unlike other implementations that just focus on the math, this simulator:
+
 - Perfectly mirrors the physical machine's signal path
 - Each array represents actual mechanical parts
 - Every step matches real hardware:
-  * Keyboard input → Electrical signal
-  * Plugboard wires → Array swaps
-  * Rotating wheels → Array shifts
-  * Electrical path → Position tracking
-  * Light bulb output → Character display
-
+  - Keyboard input → Electrical signal
+  - Plugboard wires → Array swaps
+  - Rotating wheels → Array shifts
+  - Electrical path → Position tracking
+  - Light bulb output → Character display
 
 ## ✨ Features
 
@@ -33,35 +34,37 @@ Unlike other implementations that just focus on the math, this simulator:
 - 💫 Uses actual historical Enigma rotor wirings
 - 🎯 Perfect encryption/decryption with reciprocal property
 
-
 ## 📚 Detailed Documentation
 
 Want to dive deeper? Check out these detailed docs:
+
 - `DOCUMENTATION.md`: Complete technical breakdown of how each component works
 - `CPP_CONCEPTS.md`: Learn about the C++ concepts used in this project
 - Each file explains different aspects:
-  * How hardware maps to code
-  * Historical accuracy details
-  * Programming concepts used
-  * Step-by-step encryption process
-
+  - How hardware maps to code
+  - Historical accuracy details
+  - Programming concepts used
+  - Step-by-step encryption process
 
 ## 🏃‍♂️ How to Run
 
 1. Clone the repository
 2. Compile with any C++ compiler:
+
 ```bash
 g++ main.cpp -o enigma
 ```
+
 3. Run the executable:
+
 ```bash
 ./enigma
 ```
 
-
 ## 📖 Usage Examples
 
 ### Encrypt a Message:
+
 ```
 Choose option (1-5): 1
 Enter message to encrypt: HELLO
@@ -69,6 +72,7 @@ Encrypted message: LZFBD
 ```
 
 ### Configure Plugboard:
+
 ```
 Choose option (1-5): 3
 Enter two letters to swap (e.g., AB): HM
@@ -76,6 +80,7 @@ Plugboard configured: H <-> M
 ```
 
 ### Set Rotor Positions:
+
 ```
 Choose option (1-5): 4
 Enter positions for left, middle, and right rotors (e.g., AAA): XYZ
@@ -84,10 +89,13 @@ Rotor positions set to: XYZ
 
 ## 🎯 Project Structure
 
-- `main.cpp`: Core implementation
-- `DOCUMENTATION.md`: Technical details and hardware simulation explanation
-- `CPP_CONCEPTS.md`: C++ concepts and learning resources
-- `README.md`: This file
+- `main.cpp`: Core implementation with encryption/decryption logic
+- `enigma_display.cpp`: ASCII UI and visual interface implementation
+- 📁 `docs/`
+  - `DOCUMENTATION.md`: Technical details, hardware simulation, and implementation choices
+  - `CPP_CONCEPTS.md`: C++ concepts used and learning resources
+  - `ORIGINAL.md`: Historical Enigma machine specifications and details
+- `README.md`: Project overview, setup instructions, and usage guide
 
 ## 🌟 Cool Features
 
@@ -99,6 +107,7 @@ Rotor positions set to: XYZ
 ## 💡 Learning Value
 
 This project helps you understand:
+
 - How physical encryption machines work
 - Mapping hardware to software concepts
 - Array manipulation and character handling
@@ -113,8 +122,8 @@ Add new features
 Fix bugs
 Submit pull requests
 
-
 Made with 💻 by a student fascinated by cryptography, history, and C++!
 
 ---
-*"Sometimes it is the people no one imagines anything of who do the things that no one can imagine." - Alan Turing*
+
+_"Sometimes it is the people no one imagines anything of who do the things that no one can imagine." - Alan Turing_
