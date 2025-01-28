@@ -38,13 +38,7 @@ Unlike other implementations that just focus on the math, this simulator:
 
 Want to dive deeper? Check out these detailed docs:
 
-- `DOCUMENTATION.md`: Complete technical breakdown of how each component works
-- `CPP_CONCEPTS.md`: Learn about the C++ concepts used in this project
-- Each file explains different aspects:
-  - How hardware maps to code
-  - Historical accuracy details
-  - Programming concepts used
-  - Step-by-step encryption process
+- `docs/documentation.md`: Complete technical breakdown of how each component works
 
 ## 🏃‍♂️ How to Run
 
