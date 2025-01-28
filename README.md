@@ -95,7 +95,7 @@ Rotor positions set to: XYZ
   - `DOCUMENTATION.md`: Technical details, hardware simulation, and implementation choices
   - `CPP_CONCEPTS.md`: C++ concepts used and learning resources
   - `ORIGINAL.md`: Historical Enigma machine specifications and details
-- `README.md`: Project overview, setup instructions, and usage guide
+- `README.md`: Project overview, setup instructions, and usage guide.
 
 ## 🌟 Cool Features
 
