@@ -52,7 +52,7 @@ Want to dive deeper? Check out these detailed docs:
 2. Compile with any C++ compiler:
 
 ```bash
-g++ main.cpp -o enigma
+g++ -std=c++11 main.cpp -o enigma
 ```
 
 3. Run the executable:
