@@ -2,17 +2,6 @@
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Bundesarchiv_Bild_146-2006-0188%2C_Verschl%C3%BCsselungsger%C3%A4t_%22Enigma%22.jpg/335px-Bundesarchiv_Bild_146-2006-0188%2C_Verschl%C3%BCsselungsger%C3%A4t_%22Enigma%22.jpg" width="400">
 
-## The Legacy of Enigma ⚡
-
-The Enigma machine isn't just any encryption device - it changed history! This seemingly simple machine was so complex that breaking it led to:
-
-- Creation of the first computer by Alan Turing
-- Birth of modern computing and cryptography
-- Allied victory in WWII by breaking "unbreakable" codes
-
-<img src="https://bletchleypark.org.uk/wp-content/uploads/2022/01/AlanTuring_2_945x805-945x700.jpg" width="400">
-
-## What Makes This Simulator Special 🌟
 
 Unlike other implementations that just focus on the math, this simulator:
 
@@ -59,6 +48,9 @@ g++ -std=c++11 main.cpp -o enigma
 
 ### Encrypt a Message:
 
+<img src="demoVideo/encryption.gif" width="350">
+
+
 ```
 Choose option (1-5): 1
 Enter message to encrypt: HELLO
@@ -67,6 +59,8 @@ Encrypted message: LZFBD
 
 ### Configure Plugboard:
 
+<img src="demoVideo/plugboard.gif" width="350">
+
 ```
 Choose option (1-5): 3
 Enter two letters to swap (e.g., AB): HM
@@ -74,6 +68,8 @@ Plugboard configured: H <-> M
 ```
 
 ### Set Rotor Positions:
+
+<img src="demoVideo/rotors.gif" width="350">
 
 ```
 Choose option (1-5): 4
