@@ -1,0 +1,117 @@
+#include <iostream>
+#include "rotor.cpp"
+#include "plugboard.cpp"
+using namespace std;
+
+class enigma_machine
+{
+
+private:
+    rotor right, middle, left, reflector;
+    plugboard plugboard;
+    int position;
+
+public:
+    // constructor
+    enigma_machine(char rotor1_config[26], char rotor2_config[26], char rotor3_config[26], char reflector_config[26])
+    {
+        // Normal A-Z array
+        char normal[26];
+        for (int i = 0; i < 26; i++)
+        {
+            normal[i] = 'A' + i;
+        }
+
+        // Initialize all rotors with default positions
+        right = rotor(normal, rotor1_config, 0, 'A');
+        middle = rotor(normal, rotor2_config, 0, 'A');
+        left = rotor(normal, rotor3_config, 0, 'A');
+        reflector = rotor(reflector_config, reflector_config, 0, 'A');
+
+        // Plugboard is initialized with its default constructor
+        position = 0;
+    }
+
+    void check_and_rotate_rotors()
+    {
+
+        if (right.getPosition() == 25)
+        { // positions are 0-25
+            middle.rotate_rotor();
+        }
+        if (middle.getPosition() == 25)
+        {
+            left.rotate_rotor();
+        }
+        right.rotate_rotor(); // right rotor always rotates
+    }
+
+    void reset_rotors()
+    {
+        left.reset();
+        middle.reset();
+        right.reset();
+    }
+
+    char encrypt_letter(char input)
+    {
+
+        // 1. First plugboard transformation
+        position = input - 'A';
+        char first_swap = plugboard.getMapping(position);
+        position = first_swap - 'A';
+
+        // 2. Rotate rotors first (do this before encryption)
+        check_and_rotate_rotors();
+
+        // 3. Forward path through rotors
+        position = right.step_through_rotor(position);
+        position = middle.step_through_rotor(position);
+        position = left.step_through_rotor(position);
+
+        // 4. Through reflector
+        position = reflector.step_through_rotor(position);
+
+        // 5. Reverse path through rotors
+        position = left.step_through_rotor_reverse(position);
+        position = middle.step_through_rotor_reverse(position);
+        position = right.step_through_rotor_reverse(position);
+
+        // 6. Second plugboard transformation
+        return plugboard.getMapping(position);
+    }
+
+    string encrypt_message(string message)
+    {
+        string result = "";
+
+        for (int i = 0; i < message.length(); i++)
+        {
+            char encrypted_letter = encrypt_letter(message[i]);
+            result += encrypted_letter;
+        }
+
+        return result;
+    }
+
+    void set_rotor_positions(char l, char m, char r)
+    {
+        right.setPosition(r);
+        middle.setPosition(m);
+        left.setPosition(l);
+    }
+
+    void set_plugboard_pair(char a, char b)
+    {
+        plugboard.set_plugboard_pair(a, b);
+    }
+
+    std::string get_rotor_positions() const
+    {
+        string positions = "";
+        positions += left.getCurrentLetter();
+        positions += middle.getCurrentLetter();
+        positions += right.getCurrentLetter();
+        return positions;
+    }
+};
