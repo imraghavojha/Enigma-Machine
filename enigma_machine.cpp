@@ -14,22 +14,11 @@ private:
 public:
     // constructor
     enigma_machine(char rotor1_config[26], char rotor2_config[26], char rotor3_config[26], char reflector_config[26])
+        : right(rotor1_config, 0, 'A'), // Just pass the scrambled config
+          middle(rotor2_config, 0, 'A'),
+          left(rotor3_config, 0, 'A'),
+          reflector(reflector_config, 0, 'A')
     {
-        // Normal A-Z array
-        char normal[26];
-        for (int i = 0; i < 26; i++)
-        {
-            normal[i] = 'A' + i;
-        }
-
-        // Initialize all rotors with default positions
-        right = rotor(normal, rotor1_config, 0, 'A');
-        middle = rotor(normal, rotor2_config, 0, 'A');
-        left = rotor(normal, rotor3_config, 0, 'A');
-        reflector = rotor(reflector_config, reflector_config, 0, 'A');
-
-        // Plugboard is initialized with its default constructor
-        position = 0;
     }
 
     void check_and_rotate_rotors()

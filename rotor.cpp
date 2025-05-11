@@ -11,34 +11,39 @@ private:
     int position;
     char init_position;
 
-public:
-    // constructor
-    rotor(char nor[26], char scram[26], int pos, char init_pos)
+    void create_normal_array()
     {
-        std::copy(nor, nor + 26, normal);
-        std::copy(scram, scram + 26, scrambled);
-        position = pos;
-        init_position = init_pos;
-    }
-
-    void init_rotor(char config[26], char init_config = 'A')
-    {
-
-        // Initialize normal A-Z array
         for (int i = 0; i < 26; i++)
         {
             normal[i] = 'A' + i;
         }
-        // Initialize scrambled array with config
+    }
+
+public:
+    // constructor
+    // Constructor does everything
+    // Rotor class constructor
+    rotor(char scram[26], int pos, char init_pos)
+    {
+        // Initialize normal A-Z array internally
         for (int i = 0; i < 26; i++)
         {
-            scrambled[i] = config[i];
+            normal[i] = 'A' + i; // Each rotor has its own array
         }
-        position = 0;
-        init_position = init_config; // Store initial position
 
+        // Copy scrambled configuration
+        for (int i = 0; i < 26; i++)
+        {
+            scrambled[i] = scram[i];
+        }
+
+        // Set other properties
+        position = pos;
+        init_position = init_pos;
+
+        // Set initial position
         while (normal[0] != init_position)
-        { // Fixed: using init_position
+        {
             rotate_rotor();
         }
     }
