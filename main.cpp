@@ -1,271 +1,257 @@
-#include "enigma_display.cpp"
-#include <thread>
-#include <chrono>
+#include "enigma_machine.h"
+#include "enigma_display.h"
 #include <iostream>
 #include <string>
+#include <thread>
+#include <chrono>
+#include <cctype>
+#include <algorithm>
+
 using namespace std;
 
-void print_menu(EnigmaDisplay& display, int currentChoice);
-
-struct rotor {
-    char normal[26];
-    char scrambled[26];
-    int position;
-    char init_position;
-};
-void init_plugboard(char plugboard[26]) {
-    // Initialize with default mapping (no swaps)
-    for(int i = 0; i < 26; i++) {
-        plugboard[i] = 'A' + i;
-    }
-}
-
-
-
-void set_plugboard_pair(char plugboard[26], char a, char b, EnigmaDisplay& display) {
-    // Get array indices
-    int a_idx = a - 'A';
-    int b_idx = b - 'A';
-    
-    // Swap the letters
-    plugboard[a_idx] = b;
-    plugboard[b_idx] = a;
-    
-    // Update display
-    std::vector<std::pair<char, char> > pairs;
-    for(int i = 0; i < 26; i++) {
-        if(plugboard[i] != 'A' + i) {
-            char x = 'A' + i;
-            char y = plugboard[i];
-            if(x < y) {
-                pairs.push_back(std::make_pair(x, y));
-            }
-        }
-    }
-    display.updatePlugboard(pairs);
-}
-
-void rotate_column(char y[26]) {  
-    char first = y[0];
-    for(int i = 0; i < 25; i++) {  
-        y[i] = y[i + 1];
-    }
-    y[25] = first;  
-}
-void rotate_rotor(rotor& x) {
-    rotate_column(x.normal);
-    rotate_column(x.scrambled);
-    x.position = (x.position + 1) % 26;  
-}
-void init_rotor(rotor& x, char config[26], char init_config = 'A') {
-    // Initialize normal A-Z array
-    for(int i = 0; i < 26; i++) {
-        x.normal[i] = 'A' + i;
-    }
-    // Initialize scrambled array with config
-    for(int i = 0; i < 26; i++) {
-        x.scrambled[i] = config[i];
-    }
-    x.position = 0;
-    x.init_position = init_config;  // Store initial position
-
-    while(x.normal[0] != x.init_position) {  // Fixed: using init_position
-        rotate_rotor(x);
-    }
-}
-void check_and_rotate_rotors(rotor& left, rotor& middle, rotor& right) {
-    if (right.position == 25) {   // positions are 0-25
-        rotate_rotor(middle);    
-    } 
-    if (middle.position == 25) { 
-        rotate_rotor(left);       
-    }
-    rotate_rotor(right);          // right rotor always rotates
-}
-int step_through_rotor(rotor& r, int position) {
-    // Forward path (right to left)
-    char letter = r.scrambled[position];  // Get letter from scrambled at position
-    
-    // Find this letter's position in next rotor's normal array
-    for (int i = 0; i < 26; i++) {
-        if (letter == r.normal[i]) {
-            return i;
-        }
-    }
-    return -1;
-}
-int step_through_rotor_reverse(rotor& r, int position) {
-    // Reverse path (left to right)
-    char letter = r.normal[position];  // Get letter from normal at position
-    
-    // Find this letter's position in next rotor's scrambled array
-    for (int i = 0; i < 26; i++) {
-        if (letter == r.scrambled[i]) {
-            return i;
-        }
-    }
-    return -1;
-}
-void reset_rotors(rotor& left, rotor& middle, rotor& right) {
-    // Reset left rotor
-    while(left.normal[0] != left.init_position) {
-        rotate_rotor(left);
-    }
-    
-    // Reset middle rotor
-    while(middle.normal[0] != middle.init_position) {
-        rotate_rotor(middle);
-    }
-    
-    // Reset right rotor
-    while(right.normal[0] != right.init_position) {
-        rotate_rotor(right);
-    }
-}
-char encrypt_letter(rotor& left, rotor& middle, rotor& right, rotor& reflector, char input, char plugboard[26], EnigmaDisplay& display) {
-    cout << "\nEncrypting " << input << endl;
-    cout << "Starting positions - Left: " << left.position 
-         << " Middle: " << middle.position 
-         << " Right: " << right.position << endl;
-    
-    display.updateRotors(left.normal[0], middle.normal[0], right.normal[0]);
-    display.drawFrame();
-    
-    // 1. First plugboard transformation
-    int position = input - 'A';
-    char first_swap = plugboard[position];
-    position = first_swap - 'A';
-    
-    // 2. Rotate rotors first (do this before encryption)
-    check_and_rotate_rotors(left, middle, right);
-    
-    cout << "After rotation - Left: " << left.position 
-         << " Middle: " << middle.position 
-         << " Right: " << right.position << endl;
-    
-    display.updateRotors(left.normal[0], middle.normal[0], right.normal[0]);
-    display.drawFrame();
-    
-    // 3. Forward path through rotors
-    position = step_through_rotor(right, position);
-    position = step_through_rotor(middle, position);
-    position = step_through_rotor(left, position);
-    
-    // 4. Through reflector
-    position = step_through_rotor(reflector, position);
-    
-    // 5. Reverse path through rotors
-    position = step_through_rotor_reverse(left, position);
-    position = step_through_rotor_reverse(middle, position);
-    position = step_through_rotor_reverse(right, position);
-    
-    // 6. Second plugboard transformation
-    return plugboard[position];
-}
-
-
-string encrypt_message(rotor& left, rotor& middle, rotor& right, rotor& reflector, string message, char plugboard[26], EnigmaDisplay& display) {
+// Function to convert string to uppercase and filter out non-alphabetic characters
+string prepareInput(const string &input)
+{
     string result = "";
-    
-    for(int i = 0; i < message.length(); i++) {
-        char encrypted_letter = encrypt_letter(left, middle, right, reflector, message[i], plugboard, display);
-        result += encrypted_letter;
+    for (char c : input)
+    {
+        if (isalpha(c))
+        {
+            result += toupper(c);
+        }
     }
-    
     return result;
 }
 
-void print_menu(EnigmaDisplay& display, int currentChoice) {
-    display.drawFrame();
-    display.displayMenu(currentChoice);
+// Function to validate menu choice
+bool isValidChoice(int choice)
+{
+    return choice >= 1 && choice <= 5;
 }
 
-int main() {
-    // Initialize plugboard
-    char plugboard[26];  
-    init_plugboard(plugboard);
-    
-    // Create and initialize all rotors
-    rotor right, middle, left, reflector;
-    
+// Function to animate encryption/decryption
+string processMessage(enigma_machine &machine, const string &message,
+                      EnigmaDisplay &display, bool animate = true)
+{
+    string result = "";
+    string partial_input = "";
+    string partial_output = "";
+
+    for (size_t i = 0; i < message.length(); i++)
+    {
+        // Build partial strings for display
+        partial_input = message.substr(0, i + 1);
+
+        // Encrypt/decrypt the current letter
+        char processed = machine.encrypt_letter(message[i]);
+        result += processed;
+        partial_output = result;
+
+        // Update display
+        string positions = machine.get_rotor_positions();
+        display.updateRotors(positions[0], positions[1], positions[2]);
+        display.setIO(partial_input, partial_output);
+
+        if (animate)
+        {
+            display.drawFrame();
+            this_thread::sleep_for(chrono::milliseconds(150));
+        }
+    }
+
+    return result;
+}
+
+int main()
+{
     // Historical rotor wirings
     char rotor1_config[26] = {'E', 'K', 'M', 'F', 'L', 'G', 'D', 'Q', 'V', 'Z', 'N', 'T', 'O', 'W', 'Y', 'H', 'X', 'U', 'S', 'P', 'A', 'I', 'B', 'R', 'C', 'J'};
     char rotor2_config[26] = {'A', 'J', 'D', 'K', 'S', 'I', 'R', 'U', 'X', 'B', 'L', 'H', 'W', 'T', 'M', 'C', 'Q', 'G', 'Z', 'N', 'P', 'Y', 'F', 'V', 'O', 'E'};
     char rotor3_config[26] = {'B', 'D', 'F', 'H', 'J', 'L', 'C', 'P', 'R', 'T', 'X', 'V', 'Z', 'N', 'Y', 'E', 'I', 'W', 'G', 'A', 'K', 'M', 'U', 'S', 'Q', 'O'};
     char reflector_config[26] = {'E', 'J', 'M', 'Z', 'A', 'L', 'Y', 'X', 'V', 'B', 'W', 'F', 'C', 'R', 'Q', 'U', 'O', 'N', 'T', 'S', 'P', 'I', 'K', 'H', 'G', 'D'};
 
-    // Initialize all rotors with default positions
-    init_rotor(right, rotor1_config, 'A');
-    init_rotor(middle, rotor2_config, 'A');
-    init_rotor(left, rotor3_config, 'A');
-    init_rotor(reflector, reflector_config);
+    // Create the enigma machine
+    enigma_machine machine(rotor1_config, rotor2_config, rotor3_config, reflector_config);
 
+    // Create the display
     EnigmaDisplay display;
-    std::vector<std::pair<char, char> > pairs;
-    display.updatePlugboard(pairs);
 
-    string message;
+    // Initialize display
+    vector<pair<char, char>> plugboardPairs;
+    display.updatePlugboard(plugboardPairs);
+    string positions = machine.get_rotor_positions();
+    display.updateRotors(positions[0], positions[1], positions[2]);
+
     int choice = 1;
-    
-    
-    while(true) {
-        print_menu(display, choice);
-        
+    bool running = true;
+
+    while (running)
+    {
+        // Display the current state and menu
+        display.drawFrame();
+        display.displayMenu(choice);
+
+        cout << "\nSelect option (1-5): ";
         cin >> choice;
-        cin.ignore();
 
-        if(choice == 5) break;
+        if (!isValidChoice(choice))
+        {
+            display.showMessage("Invalid choice. Please enter a number between 1 and 5.");
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            continue;
+        }
 
-        switch(choice) {
-            case 1: {
-                cout << "Enter message to encrypt: ";
-                getline(cin, message);
-                reset_rotors(left, middle, right);
-                string result = encrypt_message(left, middle, right, reflector, message, plugboard, display);
-                cout << "Encrypted: " << result << endl;
-                display.setIO(message, result);  // Changed this line
-                display.drawFrame();
-                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        cin.ignore(); // Clear the newline character
+
+        switch (choice)
+        {
+        case 1: // Encrypt message
+        case 2:
+        { // Decrypt message
+            string operation = (choice == 1) ? "encrypt" : "decrypt";
+            cout << "Enter message to " << operation << ": ";
+            string message;
+            getline(cin, message);
+
+            message = prepareInput(message);
+
+            if (message.empty())
+            {
+                display.showMessage("Invalid input. Please enter only letters.");
+                this_thread::sleep_for(chrono::milliseconds(1500));
                 break;
             }
-            case 2: {
-                cout << "Enter message to decrypt: ";
-                getline(cin, message);
-                reset_rotors(left, middle, right);
-                string result = encrypt_message(left, middle, right, reflector, message, plugboard, display);
-                cout << "Decrypted: " << result << endl;
-                display.setIO(message, result);  // Changed this line
-                display.drawFrame();
-                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+            // Reset machine and display
+            machine.reset_rotors();
+            positions = machine.get_rotor_positions();
+            display.updateRotors(positions[0], positions[1], positions[2]);
+            display.setIO("", "");
+            display.drawFrame();
+            display.showMessage("Processing message...");
+            this_thread::sleep_for(chrono::milliseconds(500));
+
+            // Process the message with animation
+            string result = processMessage(machine, message, display, true);
+
+            // Show final result
+            display.setIO(message, result);
+            display.drawFrame();
+            display.showMessage(operation + "ion complete. Result: " + result);
+
+            cout << "\nPress Enter to continue...";
+            cin.get();
+            break;
+        }
+
+        case 3:
+        { // Configure plugboard
+            cout << "Current plugboard connections: ";
+            if (plugboardPairs.empty())
+            {
+                cout << "None\n";
+            }
+            else
+            {
+                for (const auto &pair : plugboardPairs)
+                {
+                    cout << pair.first << "↔" << pair.second << " ";
+                }
+                cout << "\n";
+            }
+
+            cout << "Enter two letters to connect (or press Enter to skip): ";
+            string input;
+            getline(cin, input);
+
+            if (input.empty())
+            {
                 break;
             }
-            case 3: {
-                cout << "Enter two letters to swap (e.g., AB): ";
-                char a, b;
-                cin >> a >> b;
-                set_plugboard_pair(plugboard, a, b, display);
-                string current = "";  // Add this
-                string result = string(1, a) + "↔" + string(1, b);  // Add this
-                display.setIO(current, result);  // Changed this line
-                display.drawFrame();
-                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+            input = prepareInput(input);
+
+            if (input.length() != 2)
+            {
+                display.showMessage("Invalid input. Please enter exactly two letters.");
+                this_thread::sleep_for(chrono::milliseconds(1500));
                 break;
             }
-            case 4: {
-                cout << "Enter three letters for rotor positions (e.g., AAA): ";
-                char l, m, r;
-                cin >> l >> m >> r;
-                init_rotor(left, rotor3_config, l);
-                init_rotor(middle, rotor2_config, m);
-                init_rotor(right, rotor1_config, r);
-                display.updateRotors(left.normal[0], middle.normal[0], right.normal[0]);
-                string current = "";  // Add this
-                string result = string(1, l) + string(1, m) + string(1, r);  // Add this
-                display.setIO(current, result);  // Changed this line
-                display.drawFrame();
-                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+            char a = input[0];
+            char b = input[1];
+
+            if (a == b)
+            {
+                display.showMessage("Cannot connect a letter to itself.");
+                this_thread::sleep_for(chrono::milliseconds(1500));
                 break;
             }
+
+            // Check if either letter is already connected
+            bool alreadyConnected = false;
+            for (const auto &pair : plugboardPairs)
+            {
+                if (pair.first == a || pair.second == a ||
+                    pair.first == b || pair.second == b)
+                {
+                    alreadyConnected = true;
+                    break;
+                }
+            }
+
+            if (alreadyConnected)
+            {
+                display.showMessage("One or both letters are already connected.");
+                this_thread::sleep_for(chrono::milliseconds(1500));
+                break;
+            }
+
+            // Add the connection
+            machine.set_plugboard_pair(a, b);
+            plugboardPairs.push_back(make_pair(a, b));
+            display.updatePlugboard(plugboardPairs);
+
+            display.drawFrame();
+            display.showMessage("Plugboard connection added: " + string(1, a) + "↔" + string(1, b));
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            break;
+        }
+
+        case 4:
+        { // Set rotor positions
+            cout << "Current rotor positions: " << machine.get_rotor_positions() << "\n";
+            cout << "Enter new rotor positions (3 letters, e.g., ABC): ";
+            string input;
+            getline(cin, input);
+
+            input = prepareInput(input);
+
+            if (input.length() != 3)
+            {
+                display.showMessage("Invalid input. Please enter exactly three letters.");
+                this_thread::sleep_for(chrono::milliseconds(1500));
+                break;
+            }
+
+            // Set new positions
+            machine.set_rotor_positions(input[0], input[1], input[2]);
+            display.updateRotors(input[0], input[1], input[2]);
+
+            display.drawFrame();
+            display.showMessage("Rotor positions set to: " + input);
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            break;
+        }
+
+        case 5:
+        { // Exit
+            running = false;
+            display.drawFrame();
+            display.showMessage("Thank you for using the Enigma Machine simulator!");
+            this_thread::sleep_for(chrono::milliseconds(1000));
+            break;
+        }
         }
     }
 
