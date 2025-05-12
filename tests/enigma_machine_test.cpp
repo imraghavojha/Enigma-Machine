@@ -270,3 +270,140 @@ TEST_F(EnigmaMachineTest, RotorTurnoverBehavior)
     EXPECT_EQ(positions[1], 'B'); // Middle rotor advanced
     EXPECT_EQ(positions[0], 'A'); // Left rotor unchanged
 }
+
+// Test empty message
+TEST_F(EnigmaMachineTest, EmptyMessage)
+{
+    std::string empty = "";
+    std::string result = machine->encrypt_message(empty);
+    EXPECT_EQ(result, empty);
+    EXPECT_EQ(result.length(), 0);
+}
+
+// Test single character encryption consistency
+TEST_F(EnigmaMachineTest, SingleCharacterConsistency)
+{
+    machine->set_rotor_positions('A', 'A', 'A');
+
+    // Encrypt same letter multiple times - should give different results due to rotor movement
+    char first = machine->encrypt_letter('A');
+
+    machine->reset_rotors();
+    machine->set_rotor_positions('A', 'A', 'A');
+    machine->encrypt_letter('X'); // Move rotors
+    char second = machine->encrypt_letter('A');
+
+    EXPECT_NE(first, second); // Same input at different rotor positions should give different output
+}
+
+// Test all rotor position combinations (spot check)
+TEST_F(EnigmaMachineTest, VariousRotorPositions)
+{
+    std::string test_message = "HELLO";
+    std::map<std::string, std::string> results;
+
+    // Test a sampling of different rotor positions
+    std::vector<std::string> positions = {"AAA", "ABC", "XYZ", "MMM", "ZZZ"};
+
+    for (const auto &pos : positions)
+    {
+        machine->set_rotor_positions(pos[0], pos[1], pos[2]);
+        std::string encrypted = machine->encrypt_message(test_message);
+
+        // Each position should give a unique encryption
+        EXPECT_EQ(results.find(encrypted), results.end())
+            << "Position " << pos << " gave duplicate encryption";
+        results[encrypted] = pos;
+    }
+}
+
+// Test maximum length message
+TEST_F(EnigmaMachineTest, MaximumLengthMessage)
+{
+    // Create a very long message
+    std::string long_message(1000, 'A');
+
+    machine->set_rotor_positions('A', 'A', 'A');
+    std::string encrypted = machine->encrypt_message(long_message);
+
+    EXPECT_EQ(encrypted.length(), long_message.length());
+
+    // Verify decryption still works
+    machine->set_rotor_positions('A', 'A', 'A');
+    std::string decrypted = machine->encrypt_message(encrypted);
+
+    EXPECT_EQ(decrypted, long_message);
+}
+
+// Test rotor position wrap-around
+TEST_F(EnigmaMachineTest, RotorWrapAround)
+{
+    // Set rotors near wrap-around points
+    machine->set_rotor_positions('A', 'Y', 'Y');
+
+    // Encrypt enough letters to cause multiple wrap-arounds
+    std::string message(100, 'A');
+    machine->encrypt_message(message);
+
+    // Verify machine is still in valid state
+    std::string positions = machine->get_rotor_positions();
+    for (char c : positions)
+    {
+        EXPECT_GE(c, 'A');
+        EXPECT_LE(c, 'Z');
+    }
+}
+
+// Test plugboard with all possible pairs
+TEST_F(EnigmaMachineTest, FullPlugboardConfiguration)
+{
+    // Set up maximum plugboard connections (13 pairs)
+    machine->set_plugboard_pair('A', 'B');
+    machine->set_plugboard_pair('C', 'D');
+    machine->set_plugboard_pair('E', 'F');
+    machine->set_plugboard_pair('G', 'H');
+    machine->set_plugboard_pair('I', 'J');
+    machine->set_plugboard_pair('K', 'L');
+    machine->set_plugboard_pair('M', 'N');
+    machine->set_plugboard_pair('O', 'P');
+    machine->set_plugboard_pair('Q', 'R');
+    machine->set_plugboard_pair('S', 'T');
+    machine->set_plugboard_pair('U', 'V');
+    machine->set_plugboard_pair('W', 'X');
+    machine->set_plugboard_pair('Y', 'Z');
+
+    // Verify encryption still works
+    std::string message = "THEQUICKBROWNFOX";
+    machine->set_rotor_positions('A', 'A', 'A');
+    std::string encrypted = machine->encrypt_message(message);
+
+    machine->set_rotor_positions('A', 'A', 'A');
+    std::string decrypted = machine->encrypt_message(encrypted);
+
+    EXPECT_EQ(decrypted, message);
+}
+
+// Test state persistence
+TEST_F(EnigmaMachineTest, StatePersistence)
+{
+    // Set up a specific state
+    machine->set_rotor_positions('D', 'O', 'G');
+    machine->set_plugboard_pair('H', 'X');
+    machine->set_plugboard_pair('T', 'Y');
+
+    // Encrypt a message
+    std::string message1 = "FIRSTMESSAGE";
+    std::string encrypted1 = machine->encrypt_message(message1);
+
+    // Continue with another message (rotors should continue from where they left off)
+    std::string message2 = "SECONDMESSAGE";
+    std::string encrypted2 = machine->encrypt_message(message2);
+
+    // Reset and decrypt in order
+    machine->set_rotor_positions('D', 'O', 'G');
+    std::string decrypted1 = machine->encrypt_message(encrypted1);
+    std::string decrypted2 = machine->encrypt_message(encrypted2);
+
+    EXPECT_EQ(decrypted1, message1);
+    EXPECT_EQ(decrypted2, message2);
+}

@@ -109,3 +109,50 @@ TEST_F(PlugboardTest, EdgeCases)
     EXPECT_EQ(p.getMapping('A'), 'Z');
     EXPECT_EQ(p.getMapping('Z'), 'A');
 }
+
+// Test invalid input handling
+TEST_F(PlugboardTest, InvalidInputHandling)
+{
+    // Test with lowercase letters (if your implementation expects uppercase)
+    // This depends on whether your implementation handles this or expects caller to validate
+
+    // Test setting same letter to itself
+    p.set_plugboard_pair('A', 'A');
+    EXPECT_EQ(p.getMapping('A'), 'A');
+
+    // Test overwriting existing pairs
+    p.set_plugboard_pair('A', 'B');
+    EXPECT_EQ(p.getMapping('A'), 'B');
+
+    // Now connect A to C - what happens to B?
+    p.set_plugboard_pair('A', 'C');
+    EXPECT_EQ(p.getMapping('A'), 'C');
+    // B might now map to itself or still to A - test your implementation's behavior
+}
+
+// Test all 26 letters are handled correctly
+TEST_F(PlugboardTest, AllLettersMapping)
+{
+    // Create a complex plugboard setup
+    p.set_plugboard_pair('A', 'Z');
+    p.set_plugboard_pair('B', 'Y');
+    p.set_plugboard_pair('C', 'X');
+    p.set_plugboard_pair('D', 'W');
+
+    // Keep track of what maps to what
+    std::set<char> mapped_letters;
+
+    // Verify all 26 letters have valid mappings
+    for (char c = 'A'; c <= 'Z'; c++)
+    {
+        char mapped = p.getMapping(c);
+        EXPECT_GE(mapped, 'A');
+        EXPECT_LE(mapped, 'Z');
+
+        // Verify bidirectional mapping
+        if (c != mapped)
+        {
+            EXPECT_EQ(p.getMapping(mapped), c);
+        }
+    }
+}

@@ -168,3 +168,75 @@ TEST_F(RotorTest, DifferentRotorConfigurations)
     EXPECT_NE(r2.step_through_rotor(0), r3.step_through_rotor(0));
     EXPECT_NE(r1.step_through_rotor(0), r3.step_through_rotor(0));
 }
+
+// Test extreme rotation scenarios
+TEST_F(RotorTest, ExtensiveRotation)
+{
+    rotor r(rotor1_config, 0, 'A');
+
+    // Rotate 1000 times and verify it still works correctly
+    for (int i = 0; i < 1000; i++)
+    {
+        r.rotate_rotor();
+    }
+
+    // Position should be 1000 % 26
+    EXPECT_EQ(r.getPosition(), 1000 % 26);
+}
+
+// Test all 26 starting positions
+TEST_F(RotorTest, AllStartingPositions)
+{
+    for (char start = 'A'; start <= 'Z'; start++)
+    {
+        rotor r(rotor1_config, 0, start);
+        EXPECT_EQ(r.getCurrentLetter(), start);
+
+        // Verify reset works for all starting positions
+        r.rotate_rotor();
+        r.rotate_rotor();
+        r.reset();
+        EXPECT_EQ(r.getCurrentLetter(), start);
+    }
+}
+
+// Test boundary conditions for step_through functions
+TEST_F(RotorTest, StepThroughBoundaries)
+{
+    rotor r(rotor1_config, 0, 'A');
+
+    // Test all 26 positions
+    for (int i = 0; i < 26; i++)
+    {
+        int forward = r.step_through_rotor(i);
+        EXPECT_GE(forward, 0);
+        EXPECT_LE(forward, 25);
+
+        // Verify reverse is truly inverse
+        int reverse = r.step_through_rotor_reverse(forward);
+        EXPECT_EQ(reverse, i);
+    }
+}
+
+// Test rotor behavior after many operations
+TEST_F(RotorTest, StressTest)
+{
+    rotor r(rotor1_config, 0, 'A');
+
+    // Perform many random operations
+    for (int i = 0; i < 1000; i++)
+    {
+        if (i % 3 == 0)
+            r.rotate_rotor();
+        if (i % 5 == 0)
+            r.setPosition('A' + (i % 26));
+        if (i % 7 == 0)
+            r.reset();
+
+        // Always verify state is valid
+        EXPECT_GE(r.getPosition(), 0);
+        EXPECT_LE(r.getPosition(), 25);
+        EXPECT_GE(r.getCurrentLetter(), 'A');
+        EXPECT_LE(r.getCurrentLetter(), 'Z');
+    }
+}
