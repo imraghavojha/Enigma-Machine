@@ -1,0 +1,52 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ hotfix_plugboard ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04  # Use newer Ubuntu for newer CMake
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Install newer CMake
+      run: |
+        # Remove old CMake
+        sudo apt-get remove cmake
+        sudo apt-get purge --auto-remove cmake
+        
+        # Install newer CMake
+        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+        sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ jammy main'
+        sudo apt-get update
+        sudo apt-get install -y cmake
+        
+        # Verify CMake version
+        cmake --version
+    
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ build-essential
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+    
+    - name: Build project
+      run: |
+        cmake --build build --verbose
+    
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure
+    
+    - name: Run test executables directly
+      run: |
+        cd build/tests
+        ./all_tests
+      if: always()
