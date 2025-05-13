@@ -2,29 +2,38 @@ name: CI Build and Test
 
 on:
   push:
-    branches: [ hotfix_plugboard, main, master ]
+    branches: [ setup_git_actions, hotfix_plugboard, main, master ]
   pull_request:
     branches: [ main, master ]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    - name: Install dependencies
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y g++ cmake build-essential
+    
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install cmake
     
     - name: Check versions
       run: |
         echo "CMake version:"
         cmake --version
-        echo "G++ version:"
-        g++ --version
+        echo "OS: ${{ runner.os }}"
     
     - name: Configure project
       run: cmake -B build -S .
@@ -32,18 +41,12 @@ jobs:
     - name: Build project
       run: cmake --build build --verbose
     
-    - name: List build directory
-      run: |
-        echo "Build directory contents:"
-        ls -la build/
-        echo "Test directory contents:"
-        ls -la build/tests/
-    
     - name: Run tests with CTest
       working-directory: build
       run: ctest --output-on-failure -V
     
-    - name: Run test executables directly
+    - name: Run test executables directly (Unix)
+      if: runner.os != 'Windows'
       working-directory: build/tests
       run: |
         echo "Running all_tests..."
@@ -58,8 +61,34 @@ jobs:
         echo "Running enigma_machine_test..."
         ./enigma_machine_test
     
-    - name: Test main executable
+    - name: Run test executables directly (Windows)
+      if: runner.os == 'Windows'
+      working-directory: build/tests
+      shell: cmd
+      run: |
+        echo Running all_tests...
+        Debug\all_tests.exe
+        echo.
+        echo Running plugboard_test...
+        Debug\plugboard_test.exe
+        echo.
+        echo Running rotor_test...
+        Debug\rotor_test.exe
+        echo.
+        echo Running enigma_machine_test...
+        Debug\enigma_machine_test.exe
+    
+    - name: Test main executable (Unix)
+      if: runner.os != 'Windows'
       working-directory: build
       run: |
         echo "Testing enigma executable..."
         echo "5" | ./enigma || echo "Program exited successfully"
+    
+    - name: Test main executable (Windows)
+      if: runner.os == 'Windows'
+      working-directory: build
+      shell: cmd
+      run: |
+        echo Testing enigma executable...
+        echo 5 | Debug\enigma.exe
