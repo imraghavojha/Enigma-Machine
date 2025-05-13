@@ -1,31 +1,45 @@
-// File: enigma_machine.h
-#ifndef ENIGMA_MACHINE_H
-#define ENIGMA_MACHINE_H
+#ifndef ENIGMA_DISPLAY_H
+#define ENIGMA_DISPLAY_H
 
-#include "rotor.h"
-#include "plugboard.h"
 #include <string>
+#include <vector>
+#include <utility>
 
-class enigma_machine
+class EnigmaDisplay
 {
 private:
-    rotor right, middle, left, reflector;
-    plugboard pb; // Changed from 'plugboard' to 'pb' to avoid naming conflict
-    int position;
+    // State variables
+    char rotors[3];
+    std::vector<std::pair<char, char>> plugboard_pairs;
+    std::string current_input;
+    std::string current_output;
+
+    // Display constants
+    static const std::string TITLE;
+    static const std::string FOOTER;
+    static const int MENU_WIDTH;
+
+    // Helper functions
+    void clearScreen() const;
+    void drawBox(const std::string &title, const std::string &content) const;
+    void drawRotorDisplay() const;
+    void drawPlugboardDisplay() const;
+    void drawIODisplay() const;
+    void drawMenuOption(int option, const std::string &text, bool selected) const;
 
 public:
     // Constructor
-    enigma_machine(char rotor1_config[26], char rotor2_config[26],
-                   char rotor3_config[26], char reflector_config[26]);
+    EnigmaDisplay();
 
-    // Methods
-    void check_and_rotate_rotors();
-    void reset_rotors();
-    char encrypt_letter(char input);
-    std::string encrypt_message(std::string message);
-    void set_rotor_positions(char l, char m, char r);
-    void set_plugboard_pair(char a, char b);
-    std::string get_rotor_positions() const;
+    // Update functions
+    void updateRotors(char left, char middle, char right);
+    void updatePlugboard(const std::vector<std::pair<char, char>> &pairs);
+    void setIO(const std::string &input, const std::string &output);
+
+    // Display functions
+    void drawFrame() const;
+    void displayMenu(int currentChoice = 1) const;
+    void showMessage(const std::string &message) const;
 };
 
-#endif // ENIGMA_MACHINE_H
+#endif // ENIGMA_DISPLAY_H

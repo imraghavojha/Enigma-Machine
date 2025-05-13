@@ -31,7 +31,7 @@ bool isValidChoice(int choice)
 
 // Function to animate encryption/decryption
 string processMessage(enigma_machine &machine, const string &message,
-                      EnigmaDisplay &display, bool animate = true)
+                      EnigmaDisplay &disp, bool animate = true) // CHANGED: 'display' to 'disp'
 {
     string result = "";
     string partial_input = "";
@@ -49,12 +49,12 @@ string processMessage(enigma_machine &machine, const string &message,
 
         // Update display
         string positions = machine.get_rotor_positions();
-        display.updateRotors(positions[0], positions[1], positions[2]);
-        display.setIO(partial_input, partial_output);
+        disp.updateRotors(positions[0], positions[1], positions[2]); // CHANGED: from updateMotors
+        disp.setIO(partial_input, partial_output);
 
         if (animate)
         {
-            display.drawFrame();
+            disp.drawFrame();
             this_thread::sleep_for(chrono::milliseconds(150));
         }
     }
@@ -74,13 +74,13 @@ int main()
     enigma_machine machine(rotor1_config, rotor2_config, rotor3_config, reflector_config);
 
     // Create the display
-    EnigmaDisplay display;
+    EnigmaDisplay disp; // CHANGED: from 'display' to 'disp'
 
     // Initialize display
     vector<pair<char, char>> plugboardPairs;
-    display.updatePlugboard(plugboardPairs);
+    disp.updatePlugboard(plugboardPairs);
     string positions = machine.get_rotor_positions();
-    display.updateRotors(positions[0], positions[1], positions[2]);
+    disp.updateRotors(positions[0], positions[1], positions[2]); // CHANGED: from updateMotors
 
     int choice = 1;
     bool running = true;
@@ -88,15 +88,15 @@ int main()
     while (running)
     {
         // Display the current state and menu
-        display.drawFrame();
-        display.displayMenu(choice);
+        disp.drawFrame();
+        disp.displayMenu(choice);
 
         cout << "\nSelect option (1-5): ";
         cin >> choice;
 
         if (!isValidChoice(choice))
         {
-            display.showMessage("Invalid choice. Please enter a number between 1 and 5.");
+            disp.showMessage("Invalid choice. Please enter a number between 1 and 5.");
             this_thread::sleep_for(chrono::milliseconds(1500));
             continue;
         }
@@ -117,7 +117,7 @@ int main()
 
             if (message.empty())
             {
-                display.showMessage("Invalid input. Please enter only letters.");
+                disp.showMessage("Invalid input. Please enter only letters.");
                 this_thread::sleep_for(chrono::milliseconds(1500));
                 break;
             }
@@ -125,19 +125,19 @@ int main()
             // Reset machine and display
             machine.reset_rotors();
             positions = machine.get_rotor_positions();
-            display.updateRotors(positions[0], positions[1], positions[2]);
-            display.setIO("", "");
-            display.drawFrame();
-            display.showMessage("Processing message...");
+            disp.updateRotors(positions[0], positions[1], positions[2]); // CHANGED: from updateMotors
+            disp.setIO("", "");
+            disp.drawFrame();
+            disp.showMessage("Processing message...");
             this_thread::sleep_for(chrono::milliseconds(500));
 
             // Process the message with animation
-            string result = processMessage(machine, message, display, true);
+            string result = processMessage(machine, message, disp, true);
 
             // Show final result
-            display.setIO(message, result);
-            display.drawFrame();
-            display.showMessage(operation + "ion complete. Result: " + result);
+            disp.setIO(message, result);
+            disp.drawFrame();
+            disp.showMessage(operation + "ion complete. Result: " + result);
 
             cout << "\nPress Enter to continue...";
             cin.get();
@@ -173,7 +173,7 @@ int main()
 
             if (input.length() != 2)
             {
-                display.showMessage("Invalid input. Please enter exactly two letters.");
+                disp.showMessage("Invalid input. Please enter exactly two letters.");
                 this_thread::sleep_for(chrono::milliseconds(1500));
                 break;
             }
@@ -183,7 +183,7 @@ int main()
 
             if (a == b)
             {
-                display.showMessage("Cannot connect a letter to itself.");
+                disp.showMessage("Cannot connect a letter to itself.");
                 this_thread::sleep_for(chrono::milliseconds(1500));
                 break;
             }
@@ -202,7 +202,7 @@ int main()
 
             if (alreadyConnected)
             {
-                display.showMessage("One or both letters are already connected.");
+                disp.showMessage("One or both letters are already connected.");
                 this_thread::sleep_for(chrono::milliseconds(1500));
                 break;
             }
@@ -210,10 +210,10 @@ int main()
             // Add the connection
             machine.set_plugboard_pair(a, b);
             plugboardPairs.push_back(make_pair(a, b));
-            display.updatePlugboard(plugboardPairs);
+            disp.updatePlugboard(plugboardPairs);
 
-            display.drawFrame();
-            display.showMessage("Plugboard connection added: " + string(1, a) + "↔" + string(1, b));
+            disp.drawFrame();
+            disp.showMessage("Plugboard connection added: " + string(1, a) + "↔" + string(1, b));
             this_thread::sleep_for(chrono::milliseconds(1500));
             break;
         }
@@ -229,17 +229,17 @@ int main()
 
             if (input.length() != 3)
             {
-                display.showMessage("Invalid input. Please enter exactly three letters.");
+                disp.showMessage("Invalid input. Please enter exactly three letters.");
                 this_thread::sleep_for(chrono::milliseconds(1500));
                 break;
             }
 
             // Set new positions
             machine.set_rotor_positions(input[0], input[1], input[2]);
-            display.updateRotors(input[0], input[1], input[2]);
+            disp.updateRotors(input[0], input[1], input[2]); // CHANGED: from updateMotors
 
-            display.drawFrame();
-            display.showMessage("Rotor positions set to: " + input);
+            disp.drawFrame();
+            disp.showMessage("Rotor positions set to: " + input);
             this_thread::sleep_for(chrono::milliseconds(1500));
             break;
         }
@@ -247,8 +247,8 @@ int main()
         case 5:
         { // Exit
             running = false;
-            display.drawFrame();
-            display.showMessage("Thank you for using the Enigma Machine simulator!");
+            disp.drawFrame();
+            disp.showMessage("Thank you for using the Enigma Machine simulator!");
             this_thread::sleep_for(chrono::milliseconds(1000));
             break;
         }
