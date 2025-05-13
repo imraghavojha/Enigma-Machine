@@ -10,7 +10,7 @@ class enigma_machine
 {
 private:
     rotor right, middle, left, reflector;
-    plugboard plugboard;
+    plugboard pb; // CHANGED: renamed from 'plugboard' to 'pb'
     int position;
 
 public:
