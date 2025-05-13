@@ -14,7 +14,6 @@ enigma_machine::enigma_machine(char rotor1_config[26], char rotor2_config[26], c
 
 void enigma_machine::check_and_rotate_rotors()
 {
-
     if (right.getPosition() == 25)
     { // positions are 0-25
         middle.rotate_rotor();
@@ -35,10 +34,9 @@ void enigma_machine::reset_rotors()
 
 char enigma_machine::encrypt_letter(char input)
 {
-
     // 1. First plugboard transformation
     position = input - 'A';
-    char first_swap = plugboard.getMapping(position);
+    char first_swap = pb.getMapping(position); // CHANGED: from 'plugboard' to 'pb'
     position = first_swap - 'A';
 
     // 2. Rotate rotors first (do this before encryption)
@@ -58,7 +56,7 @@ char enigma_machine::encrypt_letter(char input)
     position = right.step_through_rotor_reverse(position);
 
     // 6. Second plugboard transformation
-    return plugboard.getMapping(position);
+    return pb.getMapping(position); // CHANGED: from 'plugboard' to 'pb'
 }
 
 string enigma_machine::encrypt_message(string message)
@@ -83,7 +81,7 @@ void enigma_machine::set_rotor_positions(char l, char m, char r)
 
 void enigma_machine::set_plugboard_pair(char a, char b)
 {
-    plugboard.set_plugboard_pair(a, b);
+    pb.set_plugboard_pair(a, b); // CHANGED: from 'plugboard' to 'pb'
 }
 
 string enigma_machine::get_rotor_positions() const

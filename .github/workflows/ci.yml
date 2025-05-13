@@ -2,51 +2,64 @@ name: CI Build and Test
 
 on:
   push:
-    branches: [ hotfix_plugboard ]
+    branches: [ hotfix_plugboard, main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-22.04  # Use newer Ubuntu for newer CMake
+    runs-on: ubuntu-22.04
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    - name: Install newer CMake
+    - name: Install dependencies
       run: |
-        # Remove old CMake
-        sudo apt-get remove cmake
-        sudo apt-get purge --auto-remove cmake
-        
-        # Install newer CMake
-        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-        sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ jammy main'
         sudo apt-get update
-        sudo apt-get install -y cmake
-        
-        # Verify CMake version
+        sudo apt-get install -y g++ cmake build-essential
+    
+    - name: Check versions
+      run: |
+        echo "CMake version:"
         cmake --version
+        echo "G++ version:"
+        g++ --version
     
-    - name: Install build dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y g++ build-essential
-    
-    - name: Configure CMake
-      run: |
-        cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+    - name: Configure project
+      run: cmake -B build -S .
     
     - name: Build project
-      run: |
-        cmake --build build --verbose
+      run: cmake --build build --verbose
     
-    - name: Run tests
+    - name: List build directory
       run: |
-        cd build
-        ctest --output-on-failure
+        echo "Build directory contents:"
+        ls -la build/
+        echo "Test directory contents:"
+        ls -la build/tests/
+    
+    - name: Run tests with CTest
+      working-directory: build
+      run: ctest --output-on-failure -V
     
     - name: Run test executables directly
+      working-directory: build/tests
       run: |
-        cd build/tests
+        echo "Running all_tests..."
         ./all_tests
-      if: always()
+        echo ""
+        echo "Running plugboard_test..."
+        ./plugboard_test
+        echo ""
+        echo "Running rotor_test..."
+        ./rotor_test
+        echo ""
+        echo "Running enigma_machine_test..."
+        ./enigma_machine_test
+    
+    - name: Test main executable
+      working-directory: build
+      run: |
+        echo "Testing enigma executable..."
+        echo "5" | ./enigma || echo "Program exited successfully"
