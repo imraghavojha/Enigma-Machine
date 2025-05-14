@@ -2,36 +2,22 @@
 build/
 cmake-build-*/
 
-# Object files
-*.o
-*.obj
-
-# Executables
-*.exe
-*.out
-enigma
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*~
-
 # Git
 .git/
 .gitignore
-
-# GitHub
 .github/
 
 # Documentation
 docs/
 *.md
 
-# Test results
-Testing/
-test-results/
+# IDE files
+.vscode/
+.idea/
 
-# OS specific files
+# OS files
 .DS_Store
 Thumbs.db
+
+# Test results
+Testing/

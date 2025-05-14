@@ -2,7 +2,7 @@ name: CI Build and Test
 
 on:
   push:
-    branches: [ main, master, setting_up_docker ]
+    branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
 
