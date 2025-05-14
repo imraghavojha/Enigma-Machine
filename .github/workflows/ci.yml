@@ -2,7 +2,7 @@ name: CI Build and Test
 
 on:
   push:
-    branches: [ setup_git_actions, hotfix_plugboard, main, master ]
+    branches: [ main, master, setting_up_docker ]
   pull_request:
     branches: [ main, master ]
 
@@ -92,3 +92,30 @@ jobs:
       run: |
         echo Testing enigma executable...
         echo 5 | Debug\enigma.exe
+
+  docker:  # This was indented incorrectly - now fixed!
+    runs-on: ubuntu-latest
+    needs: build-and-test  # Optional: ensures tests pass before Docker build
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      run: docker build -t enigma-test .
+    
+    - name: Test Docker image
+      run: |
+        echo "5" | docker run -i enigma-test
+    
+    - name: Login to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Push to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        docker tag enigma-test ${{ secrets.DOCKERHUB_USERNAME }}/enigma-machine:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/enigma-machine:latest
