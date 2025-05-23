@@ -148,6 +148,9 @@ vendor/
 # Project specific
 enigma_display
 *.enigma
+*.dockerignore
+*.DS_Store
+
 
 # Keep these files
 !.gitignore
