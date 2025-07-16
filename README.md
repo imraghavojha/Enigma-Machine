@@ -1,6 +1,6 @@
 # 🔐 Enigma Machine Simulator
 
-Live demo: http://enigma-machine.s3-website.us-east-2.amazonaws.com/
+[Live Demo](https://example.com)
 
 
 A historically accurate simulation of the German Enigma M3 cipher machine used during World War II. This implementation focuses on faithful recreation of the mechanical encryption process using modern C++ and object-oriented programming principles.
